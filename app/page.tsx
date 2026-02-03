@@ -8,33 +8,8 @@ const Page = async () => {
   cacheLife("hours");
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-  // Use a relative path during build when BASE_URL is not set to avoid external HTML error pages
-  const eventsUrl = BASE_URL ? `${BASE_URL}/api/events` : `/api/events`;
-
-  let events: IEvent[] = [];
-  try {
-    const response = await fetch(eventsUrl);
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Events fetch failed:", response.status, text);
-    } else {
-      const ct = response.headers.get("content-type") || "";
-      if (ct.includes("application/json")) {
-        const data = await response.json();
-        events = data.events || [];
-      } else {
-        const text = await response.text();
-        console.error(
-          "Unexpected content-type when fetching events:",
-          ct,
-          text?.slice(0, 200),
-        );
-      }
-    }
-  } catch (err) {
-    console.error("Error fetching events:", err);
-  }
+  const response = await fetch(`${BASE_URL}/api/events`);
+  const { events } = await response.json();
 
   return (
     <section>
