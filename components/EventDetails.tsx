@@ -3,10 +3,9 @@ import EventCard from "@/components/EventCard";
 import { IEvent } from "@/database";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import { cacheLife } from "next/cache";
+import buildApiUrl from "@/lib/baseUrl";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const EventDetailItem = ({
   icon,
@@ -55,20 +54,31 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
   cacheLife("hours");
   const slug = await params;
   let event;
+
+  const eventsUrl = buildApiUrl(`/api/events/${encodeURIComponent(slug)}`);
+
   try {
-    const request = await fetch(`${BASE_URL}/api/events/${slug}`, {
+    const request = await fetch(eventsUrl, {
       next: { revalidate: 60 },
     });
 
     if (!request.ok) {
       if (request.status === 404) {
+        // Event not found in DB
         return notFound();
       }
-      throw new Error(`Failed to fetch event: ${request.statusText}`);
+      const text = await request.text().catch(() => "");
+      throw new Error(
+        `Failed to fetch event: ${request.status} ${request.statusText} - ${text.slice(0, 200)}`,
+      );
     }
 
-    const response = await request.json();
-    event = response.event;
+    const response = await request.json().catch((err) => {
+      console.error("Failed to parse JSON for event response:", err);
+      return null;
+    });
+
+    event = response?.event;
 
     if (!event) {
       return notFound();

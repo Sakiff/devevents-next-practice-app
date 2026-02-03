@@ -2,23 +2,13 @@ import EventCard from "@/components/EventCard";
 import ExploreBtn from "@/components/ExploreBtn";
 import { IEvent } from "@/database";
 import { cacheLife } from "next/cache";
+import buildApiUrl from "@/lib/baseUrl";
 
 const Page = async () => {
   "use cache";
   cacheLife("hours");
 
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
-  // Build a safe events URL:
-  // - Use relative `/api/events` when BASE_URL is not set (works during build)
-  // - If BASE_URL exists but lacks a protocol, prepend `https://`
-  const sanitizedBase = BASE_URL ? BASE_URL.replace(/\/+$/g, "") : "";
-  const eventsUrl = sanitizedBase
-    ? sanitizedBase.startsWith("http://") ||
-      sanitizedBase.startsWith("https://")
-      ? `${sanitizedBase}/api/events`
-      : `https://${sanitizedBase}/api/events`
-    : `/api/events`;
+  const eventsUrl = buildApiUrl("/api/events/");
 
   let events: IEvent[] = [];
   try {
