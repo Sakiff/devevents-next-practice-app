@@ -107,6 +107,10 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -168,7 +172,7 @@
   }
 
   .events {
-    @apply grid md:grid-cols-3 gap-10 sm:grid-cols-2 grid-cols-1 list-none;
+    @apply grid lg:grid-cols-3 gap-10 md:grid-cols-2 grid-cols-1 list-none;
   }
 
   #event-card {
